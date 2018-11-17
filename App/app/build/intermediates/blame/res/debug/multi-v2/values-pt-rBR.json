@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\Supadmin\\Documents\\IST\\DIIC\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-pt-rBR\\values-pt-rBR.xml",
+            "outputFile": "C:\\Users\\Supadmin\\Documents\\IST\\DIIC\\Project\\Hytracked\\App\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-pt-rBR\\values-pt-rBR.xml",
             "map": [
                 {
                     "source": "C:\\Users\\Supadmin\\.gradle\\caches\\transforms-1\\files-1.1\\support-compat-28.0.0.aar\\beb63fa3cd283d01eda6ef8a00e6f1c3\\res\\values-pt-rBR\\values-pt-rBR.xml",

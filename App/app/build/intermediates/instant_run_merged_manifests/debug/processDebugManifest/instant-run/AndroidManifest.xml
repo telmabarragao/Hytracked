@@ -25,6 +25,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.hytracked.hytrackedapp.MainMenu"
+            android:label="@string/title_activity_main_menu" />
+        <activity android:name="com.hytracked.hytrackedapp.Setup" />
+        <activity
+            android:name="com.hytracked.hytrackedapp.MainMneu"
+            android:label="@string/title_activity_main_mneu" />
 
         <provider
             android:name="com.android.tools.ir.server.InstantRunContentProvider"
