@@ -1,5 +1,6 @@
 package com.hytracked.hytrackedapp;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,10 +18,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.EditText;
 import android.widget.TextView;
+
+import java.io.IOException;
 
 public class MainMenu extends AppCompatActivity {
 
+    TabThree tab3;
+    TextView nameOutput;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -40,6 +46,17 @@ public class MainMenu extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+
+
+        tab3 = new TabThree();
+        Intent intent = getIntent();
+        String message = intent.getStringExtra("NAME");
+
+
+        System.out.println(message);
+        nameOutput = findViewById(R.id.nameOutput);
+        nameOutput.setText(message);
+        //tab3.setName(message);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -151,5 +168,8 @@ public class MainMenu extends AppCompatActivity {
             // Show 3 total pages.
             return 3;
         }
+
+
     }
+
 }
