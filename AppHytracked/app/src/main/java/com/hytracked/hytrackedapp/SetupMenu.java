@@ -29,8 +29,8 @@ public class SetupMenu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup_menu);
 
-        name = (EditText)findViewById(R.id.name);
-        weight = (EditText)findViewById(R.id.Weight_input);
+        name = findViewById(R.id.name);
+        weight = findViewById(R.id.Weight_input);
 
 
     }
@@ -39,7 +39,7 @@ public class SetupMenu extends AppCompatActivity {
 
         LayoutInflater inflater = this.getLayoutInflater();
         View setupView = inflater.inflate(R.layout.activity_setup_menu, null);
-        Intent intent = new Intent(this, MainMenu.class);
+        Intent intent = new Intent(this, MainScreen.class);
 
         //GET NAME
         String theName = name.getText().toString();
@@ -48,6 +48,7 @@ public class SetupMenu extends AppCompatActivity {
         // GET WEIGHT NUMBER
 
         intent.putExtra("NAME", theName);
+        intent.putExtra("WEIGHT", theWeight);
 
         startActivity(intent);
         //float number = Float.valueOf(weight.toString());

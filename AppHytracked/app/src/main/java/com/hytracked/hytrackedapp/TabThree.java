@@ -16,13 +16,14 @@ import org.w3c.dom.Text;
 
 public class TabThree extends Fragment {
 
-    View view;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container,Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.tab_three, container, false);
 
-        return view;
+        System.out.println("aquiiiii");
+        System.out.println(R.layout.tab_three);
+
+        return inflater.inflate(R.layout.tab_three, container, false);
 
     }
 

@@ -1,13 +1,10 @@
 package com.hytracked.hytrackedapp;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -15,26 +12,32 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
-import java.util.List;
 
-
-
-
-public class TabTwo extends Fragment {
+public class MainScreen extends AppCompatActivity {
 
     LineChart lineChart, lineChart2;
+    float litresNecessary;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container,Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_screen);
 
-        View view = inflater.inflate(R.layout.tab_two, container, false);
-        lineChart = view.findViewById(R.id.lineChart);
-        lineChart2 = view.findViewById(R.id.lineChart2);
+        Intent intent = getIntent();
+        String name = intent.getStringExtra("NAME");
+        String weight = intent.getStringExtra("WEIGHT");
+
+        TextView nameOutput = findViewById(R.id.nameOutput);
+        TextView weightOutput = findViewById(R.id.weightOutput);
+
+        nameOutput.setText(name);
+        weightOutput.setText("Weight: "+weight+"kg");
+
+        lineChart = findViewById(R.id.lineChart);
+        lineChart2 = findViewById(R.id.lineChart2);
 
         createHydrationLevelChart(lineChart);
         createLitresChart(lineChart2);
-        return view;
     }
 
     private void createLitresChart(LineChart lineChart) {
@@ -117,5 +120,14 @@ public class TabTwo extends Fragment {
         lineChart.setTouchEnabled(false);
         lineChart.setDragEnabled(false);
 
+    }
+
+    public float calculateLitresNecessary(String weight){
+
+        float number = Float.valueOf(weight);
+
+        //GET NECESSARY LITRES -> SEND THIS TO BOTTLE!!!!!
+        litresNecessary = number * 0.035f;
+        return litresNecessary;
     }
 }
