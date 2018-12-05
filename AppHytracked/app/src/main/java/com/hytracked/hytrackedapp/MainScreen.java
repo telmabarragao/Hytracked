@@ -1,7 +1,10 @@
 package com.hytracked.hytrackedapp;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -10,13 +13,33 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.spec.ECField;
 import java.util.ArrayList;
 
 public class MainScreen extends AppCompatActivity {
 
+    private static final int WRITE_REQUEST_CODE = 1;
     LineChart lineChart, lineChart2;
     float litresNecessary;
+    String csvFile = "./records.csv";
+    TextView nameOutput;
+    TextView weightOutput;
+    TextView litresgoalOutput;
+    TextView litresdOutput;
+    TextView hidlevelOutput;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,17 +50,72 @@ public class MainScreen extends AppCompatActivity {
         String name = intent.getStringExtra("NAME");
         String weight = intent.getStringExtra("WEIGHT");
 
-        TextView nameOutput = findViewById(R.id.nameOutput);
-        TextView weightOutput = findViewById(R.id.weightOutput);
 
-        nameOutput.setText(name);
+        //FIELDS TO CHANGE
+        nameOutput = findViewById(R.id.nameOutput);
+        weightOutput = findViewById(R.id.weightOutput);
+        litresgoalOutput = findViewById(R.id.goal);
+        litresdOutput = findViewById(R.id.Litres);
+        hidlevelOutput = findViewById(R.id.hydrationLvlOutput);
+
+
+        //SEND WEIGHT TO BOTTLE AND SET IT
+        sendWeight(weight);
         weightOutput.setText("Weight: "+weight+"kg");
+
+
+        //SET TEXT AND WRITE TEXT AND WEIGHT ON FILE CSV
+        nameOutput.setText(name);
+        /*try {
+            //writeToCsv(""+ name + "," + weight);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+
+        //GET GOAL from BOTTLE and set in view
+        //litresgoalOutput.setText(getGoal());
+        litresgoalOutput.setText(String.valueOf(calculateLitresNecessary(weight)) + "L");
+
+
+
+        //GET ACTUAL litres dranked from BOTTLE and set in view
+        litresdOutput.setText(getActual(1) + "L Drank");
+
 
         lineChart = findViewById(R.id.lineChart);
         lineChart2 = findViewById(R.id.lineChart2);
 
         createHydrationLevelChart(lineChart);
         createLitresChart(lineChart2);
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        requestPermissions(permissions, WRITE_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case WRITE_REQUEST_CODE:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    //Granted.
+                    try {
+                        this.writeToCsv("jhsdbfjhsdbfjhdsbfhjdbfhjbsdfbdsb");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                else{
+                    //Denied.
+                }
+                break;
+        }
     }
 
     private void createLitresChart(LineChart lineChart) {
@@ -129,5 +207,100 @@ public class MainScreen extends AppCompatActivity {
         //GET NECESSARY LITRES -> SEND THIS TO BOTTLE!!!!!
         litresNecessary = number * 0.035f;
         return litresNecessary;
+    }
+
+    public void writeToCsv(String toWrite) throws IOException {
+
+
+
+
+        //String baseDir = Environment.g
+        //System.out.println(baseDir);
+        String fileName = "records.csv";
+        //String filePath = baseDir + File.separator + fileName;
+
+
+        //String filePath = csvFile;
+
+        System.out.println(toWrite);
+        System.out.println(getApplicationContext().getFilesDir());
+        FileWriter mFileWriter = null;
+        try
+        {
+            mFileWriter = new FileWriter(new File(getApplicationContext().getFilesDir(), fileName));
+        }
+        catch (Exception e) { e.printStackTrace(); }
+        CSVWriter writer = new CSVWriter(mFileWriter);
+
+        String [] toWriteOnFile = toWrite.split(",");
+
+        writer.writeNext(toWriteOnFile);
+
+        writer.close();
+
+        String yourFilePath = getApplicationContext().getFilesDir() + "/" + fileName;
+
+        try {
+            System.out.println(MainScreen.getStringFromFile(yourFilePath));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String convertStreamToString(InputStream is) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        reader.close();
+        return sb.toString();
+    }
+
+    public static String getStringFromFile (String filePath) throws Exception {
+        File fl = new File(filePath);
+        FileInputStream fin = new FileInputStream(fl);
+        String ret = convertStreamToString(fin);
+        //Make sure you close all streams.
+        fin.close();
+        return ret;
+    }
+
+    public String readFromCsv(){
+            return "";
+    }
+
+    public boolean sendWeight(String weight){
+
+        //SEND w56 example
+        System.out.println(weight);
+
+
+
+        return true;
+    }
+
+    public String getActual(int what){
+
+        if(what == 0){
+            //QUER A PERCENTAGEM
+            return "50";
+        }else{
+            //QUER OS LITROS
+            return "1,3";
+        }
+        //SEND a - receive int float
+    }
+
+    public String getGoal(){
+
+
+        //SEND g - receive float
+        return "2,4";
+    }
+
+    public String getLastOfDay(){
+        return "";
     }
 }
