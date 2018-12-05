@@ -1,29 +1,26 @@
-package com.hytracked.hytrackedapp;
+package com.example.user.hytrackedapp;
 
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
 import android.widget.TextView;
 
-public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFragmentInteractionListener
-{
-
-    TabThree tab3;
-    TextView nameOutput;
-
+public class MainMenu extends AppCompatActivity implements BlankFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -40,30 +37,37 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
      */
     private ViewPager mViewPager;
 
-    private FragmentManager fragmentManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main_menu);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        TabLayout tabLayout = findViewById(R.id.tabs);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -90,7 +94,7 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
     @Override
     public void onFragmentInteraction(Uri uri)
     {
-
+        System.out.println(uri.toString());
     }
 
     /**
@@ -122,7 +126,7 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main_menu, container, false);
-            TextView textView = rootView.findViewById(R.id.section_label);
+            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
         }
@@ -144,20 +148,16 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
 
             Fragment fragment = null;
 
-            switch (position)
-            {
+            switch (position) {
                 case 0:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
+                    fragment = new Frag1();
                     break;
                 case 1:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
+                    fragment = new Frag2();
                     break;
                 case 2:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
-                    break;
-                default: return null;
+                    fragment = BlankFragment.newInstance("NAME", "NUMBER");
             }
-
             return fragment;
         }
 
@@ -166,8 +166,5 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
             // Show 3 total pages.
             return 3;
         }
-
-
     }
-
 }

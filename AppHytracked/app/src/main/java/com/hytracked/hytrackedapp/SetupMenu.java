@@ -39,7 +39,7 @@ public class SetupMenu extends AppCompatActivity {
 
         LayoutInflater inflater = this.getLayoutInflater();
         View setupView = inflater.inflate(R.layout.activity_setup_menu, null);
-        Intent intent = new Intent(this, MainScreen.class);
+        Intent intent = new Intent(this, MainMenu.class);
 
         //GET NAME
         String theName = name.getText().toString();
