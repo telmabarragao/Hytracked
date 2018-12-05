@@ -18,7 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFragmentInteractionListener
+public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmentInteractionListener
 {
 
     TabThree tab3;
@@ -142,18 +142,22 @@ public class MainMenu extends AppCompatActivity implements TabOneFragment.OnFrag
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
 
+            Intent intent = getIntent();
+            String name = intent.getStringExtra("NAME");
+            String weight = intent.getStringExtra("WEIGHT");
+
             Fragment fragment = null;
 
             switch (position)
             {
                 case 0:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
+                    fragment = TabOneFragment.newInstance(name, weight);
                     break;
                 case 1:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
+                    fragment = TabTwoFragment.newInstance(name, weight);
                     break;
                 case 2:
-                    fragment = TabOneFragment.newInstance("NAME", "NUMBER");
+                    fragment = TabThreeFragment.newInstance(name, weight);
                     break;
                 default: return null;
             }

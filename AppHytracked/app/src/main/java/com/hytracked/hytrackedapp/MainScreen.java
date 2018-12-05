@@ -78,7 +78,6 @@ public class MainScreen extends AppCompatActivity {
         litresgoalOutput.setText(String.valueOf(calculateLitresNecessary(weight)) + "L");
 
 
-
         //GET ACTUAL litres dranked from BOTTLE and set in view
         litresdOutput.setText(getActual(1) + "L Drank");
 
@@ -94,27 +93,10 @@ public class MainScreen extends AppCompatActivity {
     protected void onStart()
     {
         super.onStart();
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        requestPermissions(permissions, WRITE_REQUEST_CODE);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case WRITE_REQUEST_CODE:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    //Granted.
-                    try {
-                        this.writeToCsv("jhsdbfjhsdbfjhdsbfhjdbfhjbsdfbdsb");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                else{
-                    //Denied.
-                }
-                break;
+        try {
+            this.writeToCsv("jhsdbfjhsdbfjhdsbfhjdbfhjbsdfbdsb");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

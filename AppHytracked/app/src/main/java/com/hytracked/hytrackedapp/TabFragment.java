@@ -1,7 +1,6 @@
 package com.hytracked.hytrackedapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,19 +8,18 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link TabOneFragment.OnFragmentInteractionListener} interface
+ * {@link TabFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link TabOneFragment#newInstance} factory method to
+ * Use the {@link TabFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class TabOneFragment extends TabFragment
+public class TabFragment extends Fragment
 {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,7 +38,7 @@ public class TabOneFragment extends TabFragment
     TextView litresdOutput;
     TextView hidlevelOutput;
 
-    public TabOneFragment() {
+    public TabFragment() {
         // Required empty public constructor
     }
 
@@ -53,8 +51,8 @@ public class TabOneFragment extends TabFragment
      * @return A new instance of fragment TabOneFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static TabOneFragment newInstance(String param1, String param2) {
-        TabOneFragment fragment = new TabOneFragment();
+    public static TabFragment newInstance(String param1, String param2) {
+        TabFragment fragment = new TabFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -85,21 +83,6 @@ public class TabOneFragment extends TabFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        litresgoalOutput = (TextView) view.findViewById(R.id.goal);
-        litresdOutput = (TextView) view.findViewById(R.id.Litres);
-        hidlevelOutput = (TextView) view.findViewById(R.id.hydrationLvlOutput);
-
-        if (litresgoalOutput != null)
-        {
-            litresgoalOutput.setText(String.valueOf(calculateLitresNecessary(mParam2)) + "L");
-        }
-
-        if (litresdOutput != null)
-        {
-            //GET ACTUAL litres dranked from BOTTLE and set in view
-            litresdOutput.setText(getActual(1) + "L Drank");
-        }
-
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -126,29 +109,6 @@ public class TabOneFragment extends TabFragment
         mListener = null;
     }
 
-
-    public float calculateLitresNecessary(String weight){
-
-        float number = Float.valueOf(weight);
-
-        //TODO: GET NECESSARY LITRES -> SEND THIS TO BOTTLE!!!!!
-        float litresNecessary;
-        litresNecessary = number * 0.035f;
-        return litresNecessary;
-    }
-
-
-    public String getActual(int what){
-
-        if(what == 0){
-            //QUER A PERCENTAGEM
-            return "50";
-        }else{
-            //QUER OS LITROS
-            return "1,3";
-        }
-        //SEND a - receive int float
-    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -159,9 +119,9 @@ public class TabOneFragment extends TabFragment
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    /*public interface OnFragmentInteractionListener
+    public interface OnFragmentInteractionListener
     {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
-    }*/
+    }
 }
