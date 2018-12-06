@@ -72,7 +72,7 @@
             android:text="@string/percentage"
             android:textAlignment="center"
             android:textColor="@android:color/holo_blue_light"
-            android:textSize="@android:dimen/app_icon_size"
+            android:textSize="60sp"
             android:typeface="sans"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

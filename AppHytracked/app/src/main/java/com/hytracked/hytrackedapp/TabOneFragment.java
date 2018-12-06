@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,11 +89,11 @@ public class TabOneFragment extends TabFragment
     {
         litresgoalOutput = (TextView) view.findViewById(R.id.goal);
         litresdOutput = (TextView) view.findViewById(R.id.Litres);
-        hidlevelOutput = (TextView) view.findViewById(R.id.hydrationLvlOutput);
+        hidlevelOutput = (TextView) view.findViewById(R.id.percentage);
 
         if (litresgoalOutput != null)
         {
-            litresgoalOutput.setText(String.valueOf(calculateLitresNecessary(mParam2)) + "L");
+            litresgoalOutput.setText("Goal: " +String.valueOf(round(calculateLitresNecessary(mParam2),2)) + "L");
         }
 
         if (litresdOutput != null)
@@ -99,6 +101,12 @@ public class TabOneFragment extends TabFragment
             //GET ACTUAL litres dranked from BOTTLE and set in view
             litresdOutput.setText(getActual(1) + "L Drank");
         }
+        if (hidlevelOutput != null)
+        {
+            //GET ACTUAL litres dranked from BOTTLE and set in view
+            hidlevelOutput.setText(getActual(0) + "%");
+        }
+
 
     }
 
@@ -164,4 +172,10 @@ public class TabOneFragment extends TabFragment
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }*/
+
+    public static BigDecimal round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd;
+    }
 }
