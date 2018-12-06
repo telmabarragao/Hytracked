@@ -97,7 +97,7 @@ public class TabOneFragment extends TabFragment
         // Adding colors on progress bar
         //ProgressBar.getProgressDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.SRC_IN);
 
-        ProgressBar.setProgress( Integer.parseInt(getActual(0)) , true);
+//        ProgressBar.setProgress( Integer.parseInt(getActual(0)) , true);
         return rootView;
     }
 

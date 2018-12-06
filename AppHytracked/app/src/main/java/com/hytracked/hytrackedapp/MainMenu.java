@@ -161,8 +161,10 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                     connectedThread = new ConnectedThread(mySocket);
                     connectedThread.start();
 
-                   // connectedThread.sendToBottle("w"+weight+"\na");
+                    connectedThread.sendToBottle("w"+weight);
+                    connectedThread.sendToBottle("\n");
                     connectedThread.sendToBottle("a");
+
 
 
                     // Toast.makeText(getApplicationContext(), "MAC Address: "+addr, Toast.LENGTH_LONG).show();
@@ -181,6 +183,9 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                     int infoSize = received.length();
 
                     String[] finalData = received.split("\\s+");
+
+                    System.out.println(received);
+                    System.out.println(finalData);
                     if (infoSize>0){
 
                         percentageReceived = finalData[0];
