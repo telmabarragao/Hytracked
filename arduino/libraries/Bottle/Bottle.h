@@ -4,25 +4,25 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
+#include <User.h>
 
 class Bottle
 {
     public:
-        Bottle(int bluetoothTXPin, int bluetoothRXPin, int ledsPin, int nLeds, int userWeight);
+        Bottle(int ledsPin, int nLeds, int userWeight);
+        void setLeds(Adafruit_NeoPixel *leds);
+        Adafruit_NeoPixel *getLeds();
+        void setNLeds(int nLeds);
+        int getNLeds();
+        void setUser(User *user);
+        User *getUser();
         void begin();
         void handle();
-        void receiveWeight();
-        void sendGoal();
-        void sendProgress();
-        float getGoal();
-        int getProgress();
         void displayProgress();
     private:
-        SoftwareSerial *_bluetooth;
         Adafruit_NeoPixel *_leds;
         int _nLeds;
-        int _userWeight;
-        float _totalConsumed;
+        User *_user;
 };
 
 #endif
