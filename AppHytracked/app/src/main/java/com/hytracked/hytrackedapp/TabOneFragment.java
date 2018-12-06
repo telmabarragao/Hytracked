@@ -2,6 +2,8 @@ package com.hytracked.hytrackedapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.math.BigDecimal;
 
 
 /**
@@ -27,10 +32,12 @@ public class TabOneFragment extends TabFragment
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String mParam3;
 
     private OnFragmentInteractionListener mListener;
 
@@ -39,6 +46,8 @@ public class TabOneFragment extends TabFragment
     TextView litresgoalOutput;
     TextView litresdOutput;
     TextView hidlevelOutput;
+    ProgressBar ProgressBar;
+
 
     public TabOneFragment() {
         // Required empty public constructor
@@ -53,11 +62,12 @@ public class TabOneFragment extends TabFragment
      * @return A new instance of fragment TabOneFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static TabOneFragment newInstance(String param1, String param2) {
+    public static TabOneFragment newInstance(String param1, String param2, String param3) {
         TabOneFragment fragment = new TabOneFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM3, param3);
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,7 +78,10 @@ public class TabOneFragment extends TabFragment
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam3 = getArguments().getString(ARG_PARAM3);
         }
+
+
     }
 
     @Override
@@ -79,6 +92,12 @@ public class TabOneFragment extends TabFragment
         View rootView = inflater.inflate(R.layout.fragment_tab_one, container, false);
         /*TextView textView = (TextView) rootView.findViewById(R.id.section_label);
         textView.setText(mParam1);*/
+        ProgressBar = rootView.findViewById(R.id.progressBar);
+
+        // Adding colors on progress bar
+        //ProgressBar.getProgressDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.SRC_IN);
+
+//        ProgressBar.setProgress( Integer.parseInt(getActual(0)) , true);
         return rootView;
     }
 
@@ -87,11 +106,11 @@ public class TabOneFragment extends TabFragment
     {
         litresgoalOutput = (TextView) view.findViewById(R.id.goal);
         litresdOutput = (TextView) view.findViewById(R.id.Litres);
-        hidlevelOutput = (TextView) view.findViewById(R.id.hydrationLvlOutput);
+        hidlevelOutput = (TextView) view.findViewById(R.id.percentage);
 
         if (litresgoalOutput != null)
         {
-            litresgoalOutput.setText(String.valueOf(calculateLitresNecessary(mParam2)) + "L");
+            litresgoalOutput.setText("Goal: " +String.valueOf(round(calculateLitresNecessary(mParam2),2)) + "L");
         }
 
         if (litresdOutput != null)
@@ -99,6 +118,12 @@ public class TabOneFragment extends TabFragment
             //GET ACTUAL litres dranked from BOTTLE and set in view
             litresdOutput.setText(getActual(1) + "L Drank");
         }
+        if (hidlevelOutput != null)
+        {
+            //GET ACTUAL litres dranked from BOTTLE and set in view
+            hidlevelOutput.setText(getActual(0) + "%");
+        }
+
 
     }
 
@@ -142,10 +167,10 @@ public class TabOneFragment extends TabFragment
 
         if(what == 0){
             //QUER A PERCENTAGEM
-            return "50";
+            return mParam1;
         }else{
             //QUER OS LITROS
-            return "1,3";
+            return mParam3;
         }
         //SEND a - receive int float
     }
@@ -164,4 +189,10 @@ public class TabOneFragment extends TabFragment
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }*/
+
+    public static BigDecimal round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd;
+    }
 }

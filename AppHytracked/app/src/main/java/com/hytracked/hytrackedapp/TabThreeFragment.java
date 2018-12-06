@@ -33,7 +33,7 @@ public class TabThreeFragment extends TabFragment {
     private OnFragmentInteractionListener mListener;
 
     TextView nameOutput;
-    EditText weightInput;
+    TextView weightInput;
 
     public TabThreeFragment() {
         // Required empty public constructor
@@ -77,7 +77,7 @@ public class TabThreeFragment extends TabFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         nameOutput = (TextView) view.findViewById(R.id.nameOutput);
-        weightInput = (EditText) view.findViewById(R.id.Weight_input);
+        weightInput = (TextView) view.findViewById(R.id.weight_input);
 
         if (nameOutput != null)
         {
@@ -86,7 +86,7 @@ public class TabThreeFragment extends TabFragment {
 
         if (weightInput != null)
         {
-            weightInput.setText(mParam2);
+            weightInput.setText(mParam2+" kg");
         }
     }
 
