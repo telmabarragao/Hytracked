@@ -2,6 +2,8 @@ package com.hytracked.hytrackedapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.math.BigDecimal;
@@ -43,6 +46,8 @@ public class TabOneFragment extends TabFragment
     TextView litresgoalOutput;
     TextView litresdOutput;
     TextView hidlevelOutput;
+    ProgressBar ProgressBar;
+
 
     public TabOneFragment() {
         // Required empty public constructor
@@ -75,6 +80,8 @@ public class TabOneFragment extends TabFragment
             mParam2 = getArguments().getString(ARG_PARAM2);
             mParam3 = getArguments().getString(ARG_PARAM3);
         }
+
+
     }
 
     @Override
@@ -85,6 +92,12 @@ public class TabOneFragment extends TabFragment
         View rootView = inflater.inflate(R.layout.fragment_tab_one, container, false);
         /*TextView textView = (TextView) rootView.findViewById(R.id.section_label);
         textView.setText(mParam1);*/
+        ProgressBar = rootView.findViewById(R.id.progressBar);
+
+        // Adding colors on progress bar
+        //ProgressBar.getProgressDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.SRC_IN);
+
+        ProgressBar.setProgress( Integer.parseInt(getActual(0)) , true);
         return rootView;
     }
 
