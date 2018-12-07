@@ -26,9 +26,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.opencsv.CSVWriter;
+
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmentInteractionListener
@@ -38,7 +44,6 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     private static final int COMUNICAR_GARRAFA = 2;
     private static final int MESSAGE_READ = 3;
 
-    TabThree tab3;
     TextView nameOutput;
     BluetoothAdapter myBluetoothAdapter = null;
     BluetoothDevice myDevice = null;
@@ -47,6 +52,9 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     ConnectedThread connectedThread;
     Handler mHandler;
     StringBuilder dadosBluetooth = new StringBuilder();
+
+    File recordsfile;
+    File fileDir;
 
     UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
@@ -107,6 +115,12 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
+
+        //CHECKTIME
+        String totalOfDay = getActualToFile(1);
+
     }
 
     @Override
@@ -161,9 +175,13 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                     connectedThread = new ConnectedThread(mySocket);
                     connectedThread.start();
 
-                    connectedThread.sendToBottle("w"+weight);
-                    connectedThread.sendToBottle("\n");
-                    connectedThread.sendToBottle("a");
+                    connectedThread.sendToBottle("w"+weight +"#");
+
+                    //int i = 0;
+                    //while(i < 10000)
+                    //    i++;
+
+                    connectedThread.sendToBottle("a" + "#");
 
 
 
@@ -186,11 +204,11 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
                     System.out.println(received);
                     System.out.println(finalData);
-                    if (infoSize>0){
+                    /*if (infoSize>0){
 
                         percentageReceived = finalData[0];
                         litresDrunkReceived = finalData[1];
-                    }
+                    }*/
 
                 }
                 dadosBluetooth.delete(0,dadosBluetooth.length());
@@ -346,4 +364,65 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     }
 
 
+    public void writeTotalInRecordCSV(String day, String total) throws IOException {
+
+        createRecordsCSVFile();
+        //ESCREVER TOTAL DO DIA NO CSV
+
+        CSVWriter writer = new CSVWriter(new FileWriter(recordsfile));
+        List<String[]> data = new ArrayList<String[]>();
+
+        //ADICIONAR DATA E TOTAL
+
+        data.add(new String[] {day , total});
+        writer.writeAll(data);
+        writer.close();
+
+    }
+
+
+    public void createRecordsCSVFile() throws IOException {
+
+        fileDir = new File(getApplicationContext().getFilesDir()+ File.separator +"database");
+        if(!fileDir.exists()) {
+            try {
+                fileDir.mkdir();
+                System.out.println("estou a fazer a dir");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        recordsfile = new File(getApplicationContext().getFilesDir()+ File.separator+"database"+ File.separator +"RecordsInfo.csv");
+        if(!recordsfile.exists()){
+            try {
+                recordsfile.createNewFile();
+                System.out.println("estou a criar o "+ recordsfile.getAbsolutePath());
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }else{
+            System.out.println("o ficheiro já existia "+ recordsfile.getAbsolutePath());
+
+        }
+
+
+
+    }
+
+
+    public String getActualToFile(int what){
+
+        if(what == 0){
+            //QUER A PERCENTAGEM
+            return "50";
+        }else{
+            //QUER OS LITROS
+            return "2";
+        }
+        //SEND a - receive int float
+    }
 }

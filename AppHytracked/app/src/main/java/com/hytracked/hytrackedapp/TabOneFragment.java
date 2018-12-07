@@ -116,12 +116,15 @@ public class TabOneFragment extends TabFragment
         if (litresdOutput != null)
         {
             //GET ACTUAL litres dranked from BOTTLE and set in view
-            litresdOutput.setText(getActual(1) + "L Drank");
+            //litresdOutput.setText(getActual(1) + "L Drank");
+            litresdOutput.setText("0L Drank");
+
         }
         if (hidlevelOutput != null)
         {
             //GET ACTUAL litres dranked from BOTTLE and set in view
-            hidlevelOutput.setText(getActual(0) + "%");
+            //hidlevelOutput.setText(getActual(0) + "%");
+            hidlevelOutput.setText("0 %");
         }
 
 
