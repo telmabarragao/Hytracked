@@ -27,6 +27,28 @@ void BluetoothAPI::begin(){
 }
 
 void BluetoothAPI::handle(){
+    char character;
+    String message = "";
+    while(getBluetooth()->available()) {
+        character = (char) getBluetooth()->read();
+        message.concat(character);
+        if (character == '#') { // if end of message received
+            Serial.print(message); //display message and
+            message = ""; //clear buffer
+            Serial.println();
+        }
+    }
+    /*switch(message[0]){
+        case('w'):
+            receiveWeight();
+            break;
+        case('g'):
+            sendGoal();
+            break;
+        case('a'):
+            sendProgress();
+            break;
+    }
     if(getBluetooth()->available()){
         switch((char)getBluetooth()->read()){
             case('w'):
@@ -39,7 +61,7 @@ void BluetoothAPI::handle(){
                 sendProgress();
                 break;
         }
-    }
+    }*/
 }
 
 void BluetoothAPI::receiveWeight(){
