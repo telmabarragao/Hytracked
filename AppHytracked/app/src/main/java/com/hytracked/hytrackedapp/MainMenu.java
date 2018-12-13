@@ -36,7 +36,9 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
     private static final int SOLICITAR_ATIVACAO = 1;
     private static final int COMUNICAR_GARRAFA = 2;
-    private static final int MESSAGE_READ = 3;
+    private static final int SEND_WEIGHT = 3;
+    private static final int ASK_FOR_PROGRESS = 4;
+    private static final int MESSAGE_READ = 5;
 
     TabThree tab3;
     TextView nameOutput;
@@ -50,7 +52,7 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
     UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
-    private static String addr = null;
+    private static String addr = "00:06:66:EB:F5:C3";
 
     String litresDrunkReceived, percentageReceived;
     String name, weight;
@@ -73,23 +75,25 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     private FragmentManager fragmentManager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main_menu);
 
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if(myBluetoothAdapter ==null){
+        if(myBluetoothAdapter ==null)
+        {
             Toast.makeText(getApplicationContext(), "Nao tens bluetooth", Toast.LENGTH_LONG).show();
         }
-        else if (!myBluetoothAdapter.isEnabled()){
+        else if (!myBluetoothAdapter.isEnabled())
+        {
             Intent ativarBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(ativarBluetooth, SOLICITAR_ATIVACAO);
         }
-        else {
+        else
+        {
             Intent comunicarGarrafa = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(comunicarGarrafa, COMUNICAR_GARRAFA);
         }
@@ -134,8 +138,8 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode){
-
+        switch(requestCode)
+        {
             case SOLICITAR_ATIVACAO:
                 if(resultCode == Activity.RESULT_OK){
                     Toast.makeText(getApplicationContext(), "Bluetooth Ativado!!", Toast.LENGTH_LONG).show();
@@ -145,8 +149,9 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                 }
                 break;
             case COMUNICAR_GARRAFA:
-                if(resultCode == Activity.RESULT_OK){
-                    addr = "00:06:66:EB:F5:C3";
+                if(resultCode == Activity.RESULT_OK)
+                {
+
                     myDevice = myBluetoothAdapter.getRemoteDevice(addr);
 
                     try{
@@ -157,20 +162,73 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                         Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
                     } catch(IOException error){
                         Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
+                        try {
+                            mySocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                     connectedThread = new ConnectedThread(mySocket);
                     connectedThread.start();
 
-                    connectedThread.sendToBottle("w"+weight);
-                    connectedThread.sendToBottle("\n");
-                    connectedThread.sendToBottle("a");
-
-
+                    connectedThread.sendToBottle("w56#");
+                    //connectedThread.sendToBottle("\n#");
+                    connectedThread.sendToBottle("a#");
+                    connectedThread.cancel();
 
                     // Toast.makeText(getApplicationContext(), "MAC Address: "+addr, Toast.LENGTH_LONG).show();
-                } else {
+                }
+                else
+                {
                     // Toast.makeText(getApplicationContext(), "Falha ao obter MAC Address", Toast.LENGTH_LONG).show();
                 }
+                break;
+            case SEND_WEIGHT:
+                myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+
+                try{
+                    mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
+                    mySocket.connect();
+
+
+                    Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
+                } catch(IOException error){
+                    Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
+                    try {
+                        mySocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                connectedThread = new ConnectedThread(mySocket);
+                connectedThread.start();
+
+                connectedThread.sendToBottle("w56#");
+                connectedThread.cancel();
+                break;
+            case ASK_FOR_PROGRESS:
+                myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+
+                try{
+                    mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
+                    mySocket.connect();
+
+
+                    Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
+                } catch(IOException error){
+                    Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
+                    try {
+                        mySocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                connectedThread = new ConnectedThread(mySocket);
+                connectedThread.start();
+
+                connectedThread.sendToBottle("a#");
+                connectedThread.cancel();
+                break;
         }
         mHandler = new Handler(){
             @Override
@@ -201,6 +259,18 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
     }
 
+    public void askForSync(View view)
+    {
+        /*LayoutInflater inflater = this.getLayoutInflater();
+        View setupView = inflater.inflate(R.layout.activity_setup_menu, null);
+        Intent intent = new Intent(this, MainMenu.class);*/
+
+        Intent communicateWithBottle = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(communicateWithBottle, SEND_WEIGHT);
+        startActivityForResult(communicateWithBottle, ASK_FOR_PROGRESS);
+
+        
+    }
 
 
 
@@ -293,7 +363,7 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     }
 
     private class ConnectedThread extends Thread {
-
+        private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
@@ -301,6 +371,8 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+
+            mmSocket = socket;
 
             // Get the input and output streams, using temp objects because
             // member streams are final
@@ -333,6 +405,16 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                 }
             }
         }
+
+
+
+        /* Call this from the main activity to shutdown the connection */
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) { }
+        }
+
 
         /* Call this from the main activity to send data to the remote device */
         public void sendToBottle(String input) {
