@@ -26,9 +26,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.opencsv.CSVWriter;
+
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmentInteractionListener
@@ -40,8 +46,9 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     private static final int ASK_FOR_PROGRESS = 4;
     private static final int MESSAGE_READ = 5;
 
-    TabThree tab3;
     TextView nameOutput;
+    TextView hydrationPercentageText = null;
+    TextView litresText = null;
     BluetoothAdapter myBluetoothAdapter = null;
     BluetoothDevice myDevice = null;
     BluetoothSocket mySocket = null;
@@ -50,11 +57,15 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     Handler mHandler;
     StringBuilder dadosBluetooth = new StringBuilder();
 
+    File recordsfile;
+    File fileDir;
+
     UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
     private static String addr = "00:06:66:EB:F5:C3";
 
-    String litresDrunkReceived, percentageReceived;
+    String messageFromBT = "";
+    String litresDrunkReceived = "0", percentageReceived = "0";
     String name, weight;
 
     /**
@@ -83,19 +94,24 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
         myBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if(myBluetoothAdapter ==null)
+        if(myBluetoothAdapter == null)
         {
-            Toast.makeText(getApplicationContext(), "Nao tens bluetooth", Toast.LENGTH_LONG).show();
-        }
-        else if (!myBluetoothAdapter.isEnabled())
-        {
-            Intent ativarBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(ativarBluetooth, SOLICITAR_ATIVACAO);
+            Toast.makeText(getApplicationContext(), "Can't get bluetooth adapter", Toast.LENGTH_LONG).show();
         }
         else
         {
-            Intent comunicarGarrafa = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(comunicarGarrafa, COMUNICAR_GARRAFA);
+            if (!myBluetoothAdapter.isEnabled())
+            {
+                Intent ativarBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(ativarBluetooth, SOLICITAR_ATIVACAO);
+            }
+
+            if (myBluetoothAdapter.isEnabled())
+            {
+                myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+                Intent comunicarGarrafa = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(comunicarGarrafa, COMUNICAR_GARRAFA);
+            }
         }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -111,6 +127,11 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+
+
+        //CHECKTIME
+        String totalOfDay = getActualToFile(1);
+
     }
 
     @Override
@@ -136,45 +157,36 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
     }
     @SuppressLint("HandlerLeak")
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(final int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode)
         {
             case SOLICITAR_ATIVACAO:
-                if(resultCode == Activity.RESULT_OK){
-                    Toast.makeText(getApplicationContext(), "Bluetooth Ativado!!", Toast.LENGTH_LONG).show();
-                } else {
-                    // Toast.makeText(getApplicationContext(), "Bluetooth não foi ativado :(, a fechar aplicacao...", Toast.LENGTH_LONG).show();
-                    finish();
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    Toast.makeText(getApplicationContext(), "Bluetooth Activated", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "Bluetooth couldn't be activated, can't sync data at the moment...", Toast.LENGTH_LONG).show();
+                    //finish();
                 }
                 break;
             case COMUNICAR_GARRAFA:
                 if(resultCode == Activity.RESULT_OK)
                 {
+                    if (checkConnectionVariables())
+                    {
+                        checkConnectedThread();
 
-                    myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+                        Intent intent = getIntent();
+                        name = intent.getStringExtra("NAME");
+                        weight = intent.getStringExtra("WEIGHT");
 
-                    try{
-                        mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
-                        mySocket.connect();
-
-
-                        Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
-                    } catch(IOException error){
-                        Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
-                        try {
-                            mySocket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        connectedThread.sendToBottle("w" + weight + "#");
+                        connectedThread.sendToBottle("a#");
                     }
-                    connectedThread = new ConnectedThread(mySocket);
-                    connectedThread.start();
 
-                    connectedThread.sendToBottle("w56#");
-                    //connectedThread.sendToBottle("\n#");
-                    connectedThread.sendToBottle("a#");
-                    connectedThread.cancel();
 
                     // Toast.makeText(getApplicationContext(), "MAC Address: "+addr, Toast.LENGTH_LONG).show();
                 }
@@ -184,70 +196,101 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
                 }
                 break;
             case SEND_WEIGHT:
-                myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    if (checkConnectionVariables())
+                    {
+                        checkConnectedThread();
 
-                try{
-                    mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
-                    mySocket.connect();
-
-
-                    Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
-                } catch(IOException error){
-                    Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
-                    try {
-                        mySocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("WEIGHT_SEND: " + weight);
+                        connectedThread.sendToBottle("w" + weight + "#");
                     }
-                }
-                connectedThread = new ConnectedThread(mySocket);
-                connectedThread.start();
 
-                connectedThread.sendToBottle("w56#");
-                connectedThread.cancel();
+
+                    // Toast.makeText(getApplicationContext(), "MAC Address: "+addr, Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    // Toast.makeText(getApplicationContext(), "Falha ao obter MAC Address", Toast.LENGTH_LONG).show();
+                }
                 break;
             case ASK_FOR_PROGRESS:
-                myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    if (checkConnectionVariables())
+                    {
+                        checkConnectedThread();
 
-                try{
-                    mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
-                    mySocket.connect();
-
-
-                    Toast.makeText(getApplicationContext(), "Conectado ao: "+addr, Toast.LENGTH_LONG).show();
-                } catch(IOException error){
-                    Toast.makeText(getApplicationContext(), "Deu merda: "+error, Toast.LENGTH_LONG).show();
-                    try {
-                        mySocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        connectedThread.sendToBottle("a#");
                     }
-                }
-                connectedThread = new ConnectedThread(mySocket);
-                connectedThread.start();
 
-                connectedThread.sendToBottle("a#");
-                connectedThread.cancel();
+                    // Toast.makeText(getApplicationContext(), "MAC Address: "+addr, Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    // Toast.makeText(getApplicationContext(), "Falha ao obter MAC Address", Toast.LENGTH_LONG).show();
+                }
                 break;
         }
         mHandler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
 
-                if(msg.what == MESSAGE_READ){
-
+                if(msg.what == MESSAGE_READ)
+                {
                     String received = (String)msg.obj;
 
                     int infoSize = received.length();
 
-                    String[] finalData = received.split("\\s+");
+                    for (int i = 0; i < received.length(); i++)
+                    {
+                        if (received.charAt(i) != '\n') {
+                            messageFromBT += received.charAt(i);
+                        }
 
-                    System.out.println(received);
-                    System.out.println(finalData);
-                    if (infoSize>0){
+                        if (received.charAt(i) == '#')
+                        {
+                            //System.out.println("FINAL DATA: " + messageFromBT);
 
-                        percentageReceived = finalData[0];
-                        litresDrunkReceived = finalData[1];
+                            String[] finalData = messageFromBT.split("\\s+");
+
+                            if (finalData.length > 2)
+                            {
+                                finalData[0] = finalData[1];
+                                finalData[1] = finalData[2];
+                            }
+                            percentageReceived = finalData[0].substring(1);
+                            litresDrunkReceived = finalData[1].substring(1,finalData[1].length() - 2);
+
+                            //for (int b = 0; b < finalData.length; b++) {System.out.println("SPLITTED: " + finalData[b]);}
+
+                            System.out.println("PERCENTAGE: " + percentageReceived);
+                            System.out.println("LITRES: " + litresDrunkReceived);
+
+                            if (requestCode == COMUNICAR_GARRAFA)
+                            {
+                                List<Fragment> test = getSupportFragmentManager().getFragments();
+
+                                if (test.size() > 0)
+                                {
+                                    if (test.get(0).getClass() == TabOneFragment.class)
+                                    {
+                                        TabOneFragment temp = (TabOneFragment) test.get(0);
+                                        if (temp.litresdOutput != null)
+                                        {
+                                            temp.litresdOutput.setText(litresDrunkReceived + "L Drank");
+                                        }
+                                        if (temp.hidlevelOutput != null)
+                                        {
+                                            temp.hidlevelOutput.setText(percentageReceived + " %");
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            messageFromBT = "";
+                        }
                     }
 
                 }
@@ -259,60 +302,113 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
     }
 
-    public void askForSync(View view)
+    private boolean checkConnectionVariables()
     {
-        /*LayoutInflater inflater = this.getLayoutInflater();
-        View setupView = inflater.inflate(R.layout.activity_setup_menu, null);
-        Intent intent = new Intent(this, MainMenu.class);*/
+        if (myDevice != null)
+        {
+            if(mySocket != null)
+            {
+                if (mySocket.isConnected())
+                {
+                    return true;
+                }
+                else
+                {
+                    try
+                    {
+                        mySocket.connect();
+                        return true;
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
 
-        Intent communicateWithBottle = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(communicateWithBottle, SEND_WEIGHT);
-        startActivityForResult(communicateWithBottle, ASK_FOR_PROGRESS);
+                    return false;
+                }
+            }
+            else
+            {
+                try
+                {
+                    mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
+                    mySocket.connect();
 
-        
+                    Toast.makeText(getApplicationContext(), "Connected to: " + addr, Toast.LENGTH_LONG).show();
+
+                    return true;
+                }
+                catch (Exception e) { e.printStackTrace(); }
+
+                return false;
+            }
+        }
+        else
+        {
+            myDevice = myBluetoothAdapter.getRemoteDevice(addr);
+            if (myDevice != null)
+            {
+                if(mySocket != null)
+                {
+                    if (mySocket.isConnected())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            mySocket.connect();
+                            return true;
+                        }
+                        catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                        return false;
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        mySocket = myDevice.createRfcommSocketToServiceRecord(myUUID);
+                        mySocket.connect();
+
+                        Toast.makeText(getApplicationContext(), "Connected to: " + addr, Toast.LENGTH_LONG).show();
+
+                        return true;
+                    }
+                    catch (Exception e) { e.printStackTrace(); }
+
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
+    private void checkConnectedThread()
+    {
+        if (connectedThread == null)
+        {
+            connectedThread = new ConnectedThread(mySocket);
+            connectedThread.start();
+        }
+        else if (!connectedThread.isAlive())
+        {
+            connectedThread.start();
+        }
+    }
 
-
-        @Override
+    @Override
     public void onFragmentInteraction(Uri uri)
     {
 
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main_menu, container, false);
-            TextView textView = rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
     }
 
     /**
@@ -362,7 +458,8 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
 
     }
 
-    private class ConnectedThread extends Thread {
+    public class ConnectedThread extends Thread
+    {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
@@ -385,20 +482,22 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
             mmOutStream = tmpOut;
         }
 
-        public void run() {
+        public void run()
+        {
             byte[] buffer = new byte[1024];  // buffer store for the stream
             int bytes; // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
+            while (true)
+            {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
 
-                    String dadosBT = new String(buffer, 0, bytes);
+                    String btData = new String(buffer, 0, bytes);
 
                     // Send the obtained bytes to the UI activity
-                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, dadosBT).sendToTarget();
+                    mHandler.obtainMessage(MESSAGE_READ, bytes, -1, btData).sendToTarget();
 
                 } catch (IOException e) {
                     break;
@@ -406,26 +505,85 @@ public class MainMenu extends AppCompatActivity implements TabFragment.OnFragmen
             }
         }
 
-
-
         /* Call this from the main activity to shutdown the connection */
-        public void cancel() {
+        public void cancel()
+        {
             try {
                 mmSocket.close();
-            } catch (IOException e) { }
+            } catch (IOException e) { e.printStackTrace(); }
         }
 
-
         /* Call this from the main activity to send data to the remote device */
-        public void sendToBottle(String input) {
+        public void sendToBottle(String input)
+        {
+            System.out.println(input);
             try {
                 byte[] msgBuffer = input.getBytes();
                 mmOutStream.write(msgBuffer);
-            } catch (IOException e) { }
+            } catch (IOException e) { e.printStackTrace(); }
         }
+    }
+
+
+    public void writeTotalInRecordCSV(String day, String total) throws IOException {
+
+        createRecordsCSVFile();
+        //ESCREVER TOTAL DO DIA NO CSV
+
+        CSVWriter writer = new CSVWriter(new FileWriter(recordsfile));
+        List<String[]> data = new ArrayList<String[]>();
+
+        //ADICIONAR DATA E TOTAL
+
+        data.add(new String[] {day , total});
+        writer.writeAll(data);
+        writer.close();
+
+    }
+
+
+    public void createRecordsCSVFile() throws IOException {
+
+        fileDir = new File(getApplicationContext().getFilesDir()+ File.separator +"database");
+        if(!fileDir.exists()) {
+            try {
+                fileDir.mkdir();
+                System.out.println("estou a fazer a dir");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        recordsfile = new File(getApplicationContext().getFilesDir()+ File.separator+"database"+ File.separator +"RecordsInfo.csv");
+        if(!recordsfile.exists()){
+            try {
+                recordsfile.createNewFile();
+                System.out.println("estou a criar o "+ recordsfile.getAbsolutePath());
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }else{
+            System.out.println("o ficheiro já existia "+ recordsfile.getAbsolutePath());
+
+        }
+
 
 
     }
 
 
+    public String getActualToFile(int what)
+    {
+        if(what == 0){
+            //QUER A PERCENTAGEM
+            return "50";
+        }else{
+            //QUER OS LITROS
+            return "2";
+        }
+        //SEND a - receive int float
+    }
 }

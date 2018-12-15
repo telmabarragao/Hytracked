@@ -8,6 +8,9 @@
 
 #define LEDS_PIN            6
 
+#define WEIGHT_DOUT         8
+#define WEIGHT_CLK          9
+
 #define N_LEDS              16
 #define DEFAULT_USER_WEIGHT 62
 

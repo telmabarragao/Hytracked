@@ -94,6 +94,8 @@ public class TabOneFragment extends TabFragment
         textView.setText(mParam1);*/
         ProgressBar = rootView.findViewById(R.id.progressBar);
 
+
+
         // Adding colors on progress bar
         //ProgressBar.getProgressDrawable().setColorFilter(Color.CYAN, PorterDuff.Mode.SRC_IN);
 
@@ -108,6 +110,8 @@ public class TabOneFragment extends TabFragment
         litresdOutput = (TextView) view.findViewById(R.id.Litres);
         hidlevelOutput = (TextView) view.findViewById(R.id.percentage);
 
+        MainMenu temp = (MainMenu)getActivity();
+
         if (litresgoalOutput != null)
         {
             litresgoalOutput.setText("Goal: " +String.valueOf(round(calculateLitresNecessary(mParam2),2)) + "L");
@@ -116,12 +120,30 @@ public class TabOneFragment extends TabFragment
         if (litresdOutput != null)
         {
             //GET ACTUAL litres dranked from BOTTLE and set in view
-            litresdOutput.setText(getActual(1) + "L Drank");
+            //litresdOutput.setText(getActual(1) + "L Drank");
+            if (temp != null)
+            {
+                litresdOutput.setText(temp.litresDrunkReceived + "L Drank");
+            }
+            else
+            {
+                litresdOutput.setText("0L Drank");
+            }
         }
         if (hidlevelOutput != null)
         {
             //GET ACTUAL litres dranked from BOTTLE and set in view
-            hidlevelOutput.setText(getActual(0) + "%");
+            //hidlevelOutput.setText(getActual(0) + "%");
+
+            if (temp != null)
+            {
+                hidlevelOutput.setText(temp.percentageReceived + " %");
+            }
+            else
+            {
+                hidlevelOutput.setText("0 %");
+            }
+
         }
 
 

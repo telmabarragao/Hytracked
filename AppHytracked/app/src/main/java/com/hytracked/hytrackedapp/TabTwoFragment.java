@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -15,8 +16,13 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.opencsv.CSVReader;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -36,6 +42,11 @@ public class TabTwoFragment extends TabFragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    File recordsfile;
+    File fileDir;
+
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -216,4 +227,92 @@ public class TabTwoFragment extends TabFragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }*/
+
+    public void createRecordsCSVFile() throws IOException {
+
+        fileDir = new File(getActivity().getApplicationContext().getFilesDir()+ File.separator +"database");
+        if(!fileDir.exists()) {
+            try {
+                fileDir.mkdir();
+                System.out.println("estou a fazer a dir");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        recordsfile = new File(getActivity().getApplicationContext().getFilesDir()+ File.separator+"database"+ File.separator +"RecordsInfo.csv");
+        if(!recordsfile.exists()){
+            try {
+                recordsfile.createNewFile();
+                System.out.println("estou a criar o "+ recordsfile.getAbsolutePath());
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }else{
+            System.out.println("o ficheiro já existia "+ recordsfile.getAbsolutePath());
+
+        }
+
+
+
+    }
+
+    public void setInfoFromCSV(){
+
+    }
+
+    public void readInfoFromCSV() throws IOException {
+
+        CSVReader reader = new CSVReader(new FileReader(recordsfile));
+        String[] row = null;
+        List content = reader.readAll();
+        String dayInFile = "";
+        String valueInFile = "";
+        int index = 0;
+
+
+
+
+        for (Object object : content) {
+            row = (String[]) object;
+
+            if(index==0){
+                //E O NOME
+                //nameInFile = row[0];
+                index+=1;
+            }else{
+                //weightInFile = row[0];
+            }
+
+
+        }
+
+        /*if(nameInFile.equals(name.getText().toString())){
+
+            if(weightInFile.equals(weight.getText().toString())){
+                //não faz nada
+                reader.close();
+
+                return false;
+            }
+            else {
+                //escreve no ficheiro
+                reader.close();
+
+                return true;
+
+            }
+        }else{
+            //escreve no ficheiro
+            System.out.println("VOU FAZER UPDATE");
+            reader.close();
+
+            return true;
+
+        }*/
+
+    }
 }

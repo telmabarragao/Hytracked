@@ -15,7 +15,8 @@ class BluetoothAPI
         Bottle *getBottle();
         void begin();
         void handle();
-        void receiveWeight();
+        void handleCompleteMessage(String message);
+        void receiveWeight(int weight);
         void sendGoal();
         void sendProgress();
     private:

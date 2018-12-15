@@ -27,23 +27,38 @@ void BluetoothAPI::begin(){
 }
 
 void BluetoothAPI::handle(){
-    if(getBluetooth()->available()){
-        switch((char)getBluetooth()->read()){
-            case('w'):
-                receiveWeight();
-                break;
-            case('g'):
-                sendGoal();
-                break;
-            case('a'):
-                sendProgress();
-                break;
+    char character;
+    String message = "";
+    while(getBluetooth()->available()) {
+        character = (char) getBluetooth()->read();
+        message.concat(character);
+        if (character == '#'){ // if end of message received
+            Serial.print(message); //display message and
+            handleCompleteMessage(message);
+            message = ""; //clear buffer
+            Serial.println();
         }
     }
 }
 
-void BluetoothAPI::receiveWeight(){
-    getBottle()->getUser()->setWeight(getBluetooth()->readString().toInt());
+void BluetoothAPI::handleCompleteMessage(String message)
+{
+	switch(message[0])
+    {
+        case('w'):
+            receiveWeight(message.substring(1, message.length()).toInt());
+            break;
+        case('g'):
+            sendGoal();
+            break;
+        case('a'):
+            sendProgress();
+            break;
+    }
+}
+
+void BluetoothAPI::receiveWeight(int weight){
+    getBottle()->getUser()->setWeight(weight);
     Serial.print("Received: set user weight to ");
     Serial.print(getBottle()->getUser()->getWeight());
     Serial.println("Kg.");
@@ -60,9 +75,11 @@ void BluetoothAPI::sendGoal(){
 void BluetoothAPI::sendProgress(){
     Serial.println("Received: get progress.");
 
-    getBluetooth()->print(getBottle()->getUser()->getProgress());
-    getBluetooth()->print(" ");
-    getBluetooth()->println(getBottle()->getUser()->getIntake());
+    String test = "p"+String(getBottle()->getUser()->getProgress()) + "," + String(getBottle()->getUser()->getIntake());
+    getBluetooth()->print("p"+String(getBottle()->getUser()->getProgress()));
+    getBluetooth()->println(" i"+String(getBottle()->getUser()->getIntake())+"#");
+    /*getBluetooth()->print(" ");
+    getBluetooth()->println(getBottle()->getUser()->getIntake());*/
 
     Serial.print("Sent: ");
     Serial.print(getBottle()->getUser()->getProgress());
